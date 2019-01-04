@@ -1,0 +1,34 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: ico-analyzer
+
+Resources:
+  MainFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: artifacts/ico-analyzer
+      Runtime: go1.x
+      MemorySize: 128
+      Timeout: 900
+      Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
+        Variables:
+          ETHEREUM_JSON_RPC_URL: "https://ropsten.infura.io"
+          MERCHANT_KEY: "secret key value"
+          PAYMENT_PROCESSOR_ADDRESS: "0x0948379E53a7f8Df9daFCbB601bFc56faF8d8Bd4"
+          #SSM_PS_PATH: /lambda/ico_reputation_analyzer_live/ # NEED TO PROVIDE AWS CREDENTIALS TO SAM LOCAL TO BE ABLE TO PULL SSM PARAMETERS FROM AWS ACCOUNT
+      Events:
+        GetHandler:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+        PostHandler:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
+        OptionsHandler:
+          Type: Api
+          Properties:
+            Path: /
+            Method: options

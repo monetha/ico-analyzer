@@ -1,0 +1,15 @@
+package: github.com/monetha/ico-analyzer
+import:
+- package: github.com/aws/aws-lambda-go
+  version: ~1.8.0
+  subpackages:
+  - lambda
+  - events
+- package: github.com/aws/aws-sdk-go
+  version: ~1.16.0
+  subpackages:
+  - session
+- package: github.com/ethereum/go-ethereum
+- package: github.com/monetha/go-ethereum
+- package: github.com/moovweb/gokogiri
+- package: github.com/monetha/reputation-go-sdk
