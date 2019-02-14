@@ -201,7 +201,7 @@ contract Contactable is Ownable {
   }
 }
 
-// File: contracts/Restricted.sol
+// File: monetha-utility-contracts/contracts/Restricted.sol
 
 /** @title Restricted
  *  Exposes onlyMonetha modifier
@@ -234,44 +234,7 @@ contract Restricted is Ownable {
     }
 }
 
-// File: contracts/GenericERC20.sol
-
-/**
-* @title GenericERC20 interface
-*/
-contract GenericERC20 {
-    function totalSupply() public view returns (uint256);
-
-    function decimals() public view returns(uint256);
-
-    function balanceOf(address _who) public view returns (uint256);
-
-    function allowance(address _owner, address _spender)
-        public view returns (uint256);
-        
-    // Return type not defined intentionally since not all ERC20 tokens return proper result type
-    function transfer(address _to, uint256 _value) public;
-
-    function approve(address _spender, uint256 _value)
-        public returns (bool);
-
-    function transferFrom(address _from, address _to, uint256 _value)
-        public returns (bool);
-
-    event Transfer(
-        address indexed from,
-        address indexed to,
-        uint256 value
-    );
-
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
-}
-
-// File: contracts/IMonethaVoucher.sol
+// File: monetha-loyalty-contracts/contracts/IMonethaVoucher.sol
 
 interface IMonethaVoucher {
     /**
@@ -343,6 +306,43 @@ interface IMonethaVoucher {
     function purchasedBy(address owner) external view returns (uint256);
 }
 
+// File: contracts/GenericERC20.sol
+
+/**
+* @title GenericERC20 interface
+*/
+contract GenericERC20 {
+    function totalSupply() public view returns (uint256);
+
+    function decimals() public view returns(uint256);
+
+    function balanceOf(address _who) public view returns (uint256);
+
+    function allowance(address _owner, address _spender)
+        public view returns (uint256);
+        
+    // Return type not defined intentionally since not all ERC20 tokens return proper result type
+    function transfer(address _to, uint256 _value) public;
+
+    function approve(address _spender, uint256 _value)
+        public returns (bool);
+
+    function transferFrom(address _from, address _to, uint256 _value)
+        public returns (bool);
+
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 value
+    );
+
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
+}
+
 // File: contracts/MonethaGateway.sol
 
 /**
@@ -407,6 +407,12 @@ contract MonethaGateway is Pausable, Contactable, Destructible, Restricted {
         setMaxDiscountPermille(700); // 70%
     }
 
+    /**
+     *  acceptPayment accept payment from PaymentAcceptor, forwards it to merchant's wallet
+     *      and collects Monetha fee.
+     *  @param _merchantWallet address of merchant's wallet for fund transfer
+     *  @param _monethaFee is a fee collected by Monetha
+     */
     /**
      *  acceptPayment accept payment from PaymentAcceptor, forwards it to merchant's wallet
      *      and collects Monetha fee.
@@ -670,7 +676,7 @@ contract MerchantDealsHistory is Contactable, Restricted {
     }
 }
 
-// File: contracts/SafeDestructible.sol
+// File: monetha-utility-contracts/contracts/SafeDestructible.sol
 
 /**
  * @title SafeDestructible
@@ -1040,6 +1046,7 @@ contract PaymentProcessor is Pausable, Destructible, Contactable, Restricted {
     {
         Order storage order = orders[_orderId];
 
+        require(order.tokenAddress == address(0));
         require(msg.sender == order.paymentAcceptor);
         require(msg.value == order.price);
     }
@@ -1151,6 +1158,8 @@ contract PaymentProcessor is Pausable, Destructible, Contactable, Restricted {
     atState(_orderId, State.Refunding) transition(_orderId, State.Refunded)
     {
         Order storage order = orders[_orderId];
+        require(order.tokenAddress == address(0));
+
         order.originAddress.transfer(order.price.sub(order.discount));
     }
 
